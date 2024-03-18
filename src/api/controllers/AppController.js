@@ -1,6 +1,6 @@
 import { firebase, db } from "../../config/firebaseConfig.js";
-import { addDoc, collection } from "firebase/firestore";
-// import * as Location from "expo-location";
+import { addDoc, collection, query, where, getDocs } from "firebase/firestore";
+const usersRef = collection(db, "users");
 
 export async function testExpress(req, res) {
   res.json({ message: "Hello, World!" });
@@ -36,12 +36,27 @@ export async function handleSignUp(req, res) {
   }
 }
 
-// export async function handleLocationPermission(req, res) {
-//   try {
-//     const status = await Location.requestForegroundPermissionsAsync();
-//     res.json({ status });
-//   } catch (error) {
-//     console.error("Error requesting location permission:", error);
-//     res.status(500).json({ error: "Failed to request location permission" });
-//   }
-// }
+export async function getKbGyms(req, res) {
+  db.collection("kbgyms")
+    .get()
+    .then((querySnapshot) => {
+      const updatedLocations = querySnapshot.docs.map((doc) => {
+        if (doc.data().coords) {
+          return { ...doc.data(), id: doc.id };
+        }
+      });
+      res.json({ updatedLocations: updatedLocations });
+    })
+    .catch((error) => {
+      res.status(500).json({ error: error.message });
+    });
+}
+
+export async function getUserByEmail(req, res) {
+  const q = query(usersRef, where("email", "==", req.query.email));
+  const querySnapshot = await getDocs(q);
+  querySnapshot.forEach((doc) => {
+    res.json({ user: doc.data() });
+  });
+}
+
