@@ -1,20 +1,23 @@
 import express from "express";
 import {
   testExpress,
-  handleLogIn,
-  handleSignUp,
+  handleLogInUser,
+  handleSignUpUser,
   getKbGyms,
-  getUserByEmail
+  getUserByEmail,
+  handleLogOut,
 } from "../controllers/AppController.js";
 
 export const appRoutes = express.Router();
 
 appRoutes.get("/test", testExpress);
 
-appRoutes.post("/login", handleLogIn);
+appRoutes.post("/login-user", handleLogInUser);
 
-appRoutes.post("/signup", handleSignUp);
+appRoutes.post("/signup-user", handleSignUpUser);
 
 appRoutes.get("/kbgyms", getKbGyms);
 
 appRoutes.get("/users", getUserByEmail);
+
+appRoutes.post("/logout", handleLogOut);

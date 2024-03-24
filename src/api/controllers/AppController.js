@@ -6,7 +6,7 @@ export async function testExpress(req, res) {
   res.json({ message: "Hello, World!" });
 }
 
-export async function handleLogIn(req, res) {
+export async function handleLogInUser(req, res) {
   try {
     const email = req.body.email;
     const password = req.body.password;
@@ -17,7 +17,7 @@ export async function handleLogIn(req, res) {
   }
 }
 
-export async function handleSignUp(req, res) {
+export async function handleSignUpUser(req, res) {
   try {
     const userData = req.body.userData;
 
@@ -60,3 +60,11 @@ export async function getUserByEmail(req, res) {
   });
 }
 
+export async function handleLogOut(req, res){
+  try {
+    await firebase.auth().signOut();
+    res.status(200).json({});
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+}
