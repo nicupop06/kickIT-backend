@@ -6,6 +6,7 @@ import {
   getKbGyms,
   getUserByEmail,
   handleLogOut,
+  handleSignupGym,
 } from "../controllers/AppController.js";
 
 export const appRoutes = express.Router();
@@ -21,3 +22,5 @@ appRoutes.get("/kbgyms", getKbGyms);
 appRoutes.get("/users", getUserByEmail);
 
 appRoutes.post("/logout", handleLogOut);
+
+appRoutes.post("/signup-gym", handleSignupGym);

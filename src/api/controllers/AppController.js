@@ -1,6 +1,7 @@
 import { firebase, db } from "../../config/firebaseConfig.js";
 import { addDoc, collection, query, where, getDocs } from "firebase/firestore";
 const usersRef = collection(db, "users");
+const gymsRef = collection(db, "kbgyms");
 
 export async function testExpress(req, res) {
   res.json({ message: "Hello, World!" });
@@ -28,7 +29,7 @@ export async function handleSignUpUser(req, res) {
 
     //Store the user in the db
     delete userData.password;
-    await addDoc(collection(db, "users"), userData);
+    await addDoc(usersRef, userData);
 
     res.status(200).json(userData);
   } catch (error) {
@@ -60,10 +61,20 @@ export async function getUserByEmail(req, res) {
   });
 }
 
-export async function handleLogOut(req, res){
+export async function handleLogOut(req, res) {
   try {
     await firebase.auth().signOut();
     res.status(200).json({});
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+}
+
+export async function handleSignupGym(req, res) {
+  try {
+    const gymData = req.body.gymData;
+    await addDoc(gymsRef, gymData);
+    res.status(200).json(gymData);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
