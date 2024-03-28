@@ -1,5 +1,15 @@
 import { firebase, db } from "../../config/firebaseConfig.js";
-import { addDoc, collection, query, where, getDocs } from "firebase/firestore";
+import {
+  doc,
+  addDoc,
+  collection,
+  query,
+  where,
+  getDocs,
+  setDoc,
+} from "firebase/firestore";
+import { v4 as uuidv4 } from "uuid";
+import qrcode from "qrcode";
 const usersRef = collection(db, "users");
 const gymsRef = collection(db, "kbgyms");
 
@@ -73,7 +83,10 @@ export async function handleLogOut(req, res) {
 export async function handleSignupGym(req, res) {
   try {
     const gymData = req.body.gymData;
-    await addDoc(gymsRef, gymData);
+    const uuid = uuidv4();
+    const pngQrCode = await qrcode.toDataURL(uuid, { type: "png" });
+    gymData.qrCode = pngQrCode;
+    await setDoc(doc(gymsRef, uuid), gymData);
     res.status(200).json(gymData);
   } catch (error) {
     res.status(500).json({ error: error.message });
