@@ -10,6 +10,11 @@ import {
 } from "firebase/firestore";
 import { v4 as uuidv4 } from "uuid";
 import qrcode from "qrcode";
+import Stripe from "stripe";
+import { STRIPE_SECRET_KEY } from "../../config/stripeConfig.js";
+
+
+const stripe = Stripe(STRIPE_SECRET_KEY, {apiVersion:"2023-10-16"})
 const usersRef = collection(db, "users");
 const gymsRef = collection(db, "kbgyms");
 
@@ -84,11 +89,30 @@ export async function handleSignupGym(req, res) {
   try {
     const gymData = req.body.gymData;
     const uuid = uuidv4();
-    const pngQrCode = await qrcode.toDataURL(uuid, { type: "png" });
+    const pngQrCode = await qrcode.toDataURL(gymData.owner, { type: "png" });
     gymData.qrCode = pngQrCode;
     await setDoc(doc(gymsRef, uuid), gymData);
     res.status(200).json(gymData);
   } catch (error) {
     res.status(500).json({ error: error.message });
+  }
+}
+
+export async function createPaymentIntent(req, res) {
+  try {
+    const paymentIntent = await stripe.paymentIntents.create({
+      amount: 1099,
+      currency: "usd",
+      payment_method_types: ["card"],
+    });
+
+    const clientSecret = paymentIntent.client_secret;
+
+    res.json({
+      clientSecret: clientSecret,
+    });
+  } catch (e) {
+    console.log(e.message);
+    res.status(500).json({ error: e.message });
   }
 }

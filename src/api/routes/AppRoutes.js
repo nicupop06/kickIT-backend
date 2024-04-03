@@ -7,6 +7,7 @@ import {
   getUserByEmail,
   handleLogOut,
   handleSignupGym,
+  createPaymentIntent,
 } from "../controllers/AppController.js";
 
 export const appRoutes = express.Router();
@@ -24,3 +25,5 @@ appRoutes.get("/users", getUserByEmail);
 appRoutes.post("/logout", handleLogOut);
 
 appRoutes.post("/signup-gym", handleSignupGym);
+
+appRoutes.post("/stripe-secret", createPaymentIntent);
