@@ -6,6 +6,7 @@ import {
   query,
   where,
   getDocs,
+  getDoc,
   setDoc,
 } from "firebase/firestore";
 import { v4 as uuidv4 } from "uuid";
@@ -89,7 +90,7 @@ export async function handleSignupGym(req, res) {
   try {
     const gymData = req.body.gymData;
     const uuid = uuidv4();
-    const pngQrCode = await qrcode.toDataURL(gymData.owner, { type: "png" });
+    const pngQrCode = await qrcode.toDataURL(gymData.owner + " " + uuid, { type: "png" });
     gymData.qrCode = pngQrCode;
     await setDoc(doc(gymsRef, uuid), gymData);
     res.status(200).json(gymData);
@@ -100,9 +101,15 @@ export async function handleSignupGym(req, res) {
 
 export async function createPaymentIntent(req, res) {
   try {
+    const gymId = req.body.gymId;
+    // Retrieve gym data using the provided gymId
+    const gymDoc = doc(gymsRef, gymId);
+    const gymSnapshot = await getDoc(gymDoc);
+    const amount = gymSnapshot.data().entryPrice * 100;
+    // Create a payment intent for the gym
     const paymentIntent = await stripe.paymentIntents.create({
-      amount: 1099,
-      currency: "usd",
+      amount: amount,
+      currency: "ron",
       payment_method_types: ["card"],
     });
 
