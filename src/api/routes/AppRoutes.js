@@ -8,6 +8,7 @@ import {
   handleLogOut,
   handleSignupGym,
   createPaymentIntent,
+  handleGetReviews,
 } from "../controllers/AppController.js";
 
 export const appRoutes = express.Router();
@@ -27,3 +28,5 @@ appRoutes.post("/logout", handleLogOut);
 appRoutes.post("/signup-gym", handleSignupGym);
 
 appRoutes.post("/stripe-secret", createPaymentIntent);
+
+appRoutes.get("/reviews", handleGetReviews);

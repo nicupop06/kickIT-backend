@@ -14,10 +14,10 @@ import qrcode from "qrcode";
 import Stripe from "stripe";
 import { STRIPE_SECRET_KEY } from "../../config/stripeConfig.js";
 
-
-const stripe = Stripe(STRIPE_SECRET_KEY, {apiVersion:"2023-10-16"})
+const stripe = Stripe(STRIPE_SECRET_KEY, { apiVersion: "2023-10-16" });
 const usersRef = collection(db, "users");
 const gymsRef = collection(db, "kbgyms");
+const reviewsRef = collection(db, "reviews");
 
 export async function testExpress(req, res) {
   res.json({ message: "Hello, World!" });
@@ -90,7 +90,9 @@ export async function handleSignupGym(req, res) {
   try {
     const gymData = req.body.gymData;
     const uuid = uuidv4();
-    const pngQrCode = await qrcode.toDataURL(gymData.owner + " " + uuid, { type: "png" });
+    const pngQrCode = await qrcode.toDataURL(gymData.owner + " " + uuid, {
+      type: "png",
+    });
     gymData.qrCode = pngQrCode;
     await setDoc(doc(gymsRef, uuid), gymData);
     res.status(200).json(gymData);
@@ -122,4 +124,15 @@ export async function createPaymentIntent(req, res) {
     console.log(e.message);
     res.status(500).json({ error: e.message });
   }
+}
+
+export async function handleGetReviews(req, res) {
+  const gymId = req.query.gymId;
+  const q = query(reviewsRef, where("gymId", "==", gymId));
+  const querySnapshot = await getDocs(q);
+  var reviews = [];
+  querySnapshot.forEach((doc) => {
+    reviews.push(doc.data());
+  });
+  res.json({ reviews: reviews })
 }
