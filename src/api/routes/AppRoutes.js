@@ -9,6 +9,7 @@ import {
   handleSignupGym,
   createPaymentIntent,
   handleGetReviews,
+  handleCreateReview,
 } from "../controllers/AppController.js";
 
 export const appRoutes = express.Router();
@@ -30,3 +31,5 @@ appRoutes.post("/signup-gym", handleSignupGym);
 appRoutes.post("/stripe-secret", createPaymentIntent);
 
 appRoutes.get("/reviews", handleGetReviews);
+
+appRoutes.post("/reviews", handleCreateReview);

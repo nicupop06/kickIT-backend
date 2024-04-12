@@ -134,5 +134,16 @@ export async function handleGetReviews(req, res) {
   querySnapshot.forEach((doc) => {
     reviews.push(doc.data());
   });
-  res.json({ reviews: reviews })
+  res.json({ reviews: reviews });
+}
+
+export async function handleCreateReview(req, res) {
+  try {
+    const reviewData = req.body.reviewData;
+    await addDoc(reviewsRef, reviewData);
+
+    res.status(200).json(reviewData);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
 }
