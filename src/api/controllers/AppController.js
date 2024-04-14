@@ -140,6 +140,11 @@ export async function handleGetReviews(req, res) {
 export async function handleCreateReview(req, res) {
   try {
     const reviewData = req.body.reviewData;
+    
+    const currentDate = new Date();
+    const formattedDate = `${currentDate.getDate()}/${currentDate.getMonth() + 1}/${currentDate.getFullYear()}`;
+    reviewData.date = formattedDate;
+
     await addDoc(reviewsRef, reviewData);
 
     res.status(200).json(reviewData);
