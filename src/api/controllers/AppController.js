@@ -8,6 +8,7 @@ import {
   getDocs,
   getDoc,
   setDoc,
+  updateDoc,
 } from "firebase/firestore";
 import { v4 as uuidv4 } from "uuid";
 import qrcode from "qrcode";
@@ -56,19 +57,14 @@ export async function handleSignUpUser(req, res) {
 }
 
 export async function getKbGyms(req, res) {
-  db.collection("kbgyms")
-    .get()
-    .then((querySnapshot) => {
-      const updatedLocations = querySnapshot.docs.map((doc) => {
-        if (doc.data().coords) {
-          return { ...doc.data(), id: doc.id };
-        }
-      });
-      res.json({ updatedLocations: updatedLocations });
-    })
-    .catch((error) => {
-      res.status(500).json({ error: error.message });
-    });
+  const email = req.query.email;
+  const q = query(gymsRef, where("owner", "==", email));
+  const querySnapshot = await getDocs(q);
+  var gyms = [];
+  querySnapshot.forEach((doc) => {
+    gyms.push(doc.data());
+  });
+  res.json({ adminGyms: gyms });
 }
 
 export async function getUserByEmail(req, res) {
@@ -107,10 +103,18 @@ export async function createPaymentIntent(req, res) {
   try {
     const gymId = req.body.gymId;
     const userEmail = req.body.email; // Extract email from request body
+
     // Retrieve gym data using the provided gymId
     const gymDoc = doc(gymsRef, gymId);
     const gymSnapshot = await getDoc(gymDoc);
-    const amount = gymSnapshot.data().entryPrice * 100;
+    const gymData = gymSnapshot.data();
+
+    if (!gymData) {
+      throw new Error("Gym not found");
+    }
+
+    const amount = gymData.entryPrice * 100;
+
     // Create a payment intent for the gym
     const paymentIntent = await stripe.paymentIntents.create({
       amount: amount,
@@ -135,6 +139,10 @@ export async function createPaymentIntent(req, res) {
         { merge: true }
       );
     }
+
+    // Update the noEntries field for the gym document
+    const updatedNoEntries = (gymData.noEntries || 0) + 1;
+    await updateDoc(gymDoc, { noEntries: updatedNoEntries });
 
     const clientSecret = paymentIntent.client_secret;
 

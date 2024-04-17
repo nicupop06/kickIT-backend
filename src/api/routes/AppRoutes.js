@@ -17,13 +17,17 @@ export const appRoutes = express.Router();
 
 appRoutes.get("/test", testExpress);
 
+appRoutes.get("/admin-kbgyms", getKbGyms);
+
+appRoutes.get("/users", getUserByEmail);
+
+appRoutes.get("/reviews", handleGetReviews);
+
+appRoutes.get("/videos", handleGetVideos);
+
 appRoutes.post("/login-user", handleLogInUser);
 
 appRoutes.post("/signup-user", handleSignUpUser);
-
-appRoutes.get("/kbgyms", getKbGyms);
-
-appRoutes.get("/users", getUserByEmail);
 
 appRoutes.post("/logout", handleLogOut);
 
@@ -31,8 +35,4 @@ appRoutes.post("/signup-gym", handleSignupGym);
 
 appRoutes.post("/stripe-secret", createPaymentIntent);
 
-appRoutes.get("/reviews", handleGetReviews);
-
 appRoutes.post("/reviews", handleCreateReview);
-
-appRoutes.get("/videos", handleGetVideos);
