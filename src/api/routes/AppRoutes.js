@@ -10,6 +10,7 @@ import {
   createPaymentIntent,
   handleGetReviews,
   handleCreateReview,
+  handleGetVideos,
 } from "../controllers/AppController.js";
 
 export const appRoutes = express.Router();
@@ -33,3 +34,5 @@ appRoutes.post("/stripe-secret", createPaymentIntent);
 appRoutes.get("/reviews", handleGetReviews);
 
 appRoutes.post("/reviews", handleCreateReview);
+
+appRoutes.get("/videos", handleGetVideos);

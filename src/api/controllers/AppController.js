@@ -1,4 +1,4 @@
-import { firebase, db } from "../../config/firebaseConfig.js";
+import { firebase, db, storage } from "../../config/firebaseConfig.js";
 import {
   doc,
   addDoc,
@@ -13,11 +13,13 @@ import { v4 as uuidv4 } from "uuid";
 import qrcode from "qrcode";
 import Stripe from "stripe";
 import { STRIPE_SECRET_KEY } from "../../config/stripeConfig.js";
+import { ref, listAll, getDownloadURL } from "@firebase/storage";
 
 const stripe = Stripe(STRIPE_SECRET_KEY, { apiVersion: "2023-10-16" });
 const usersRef = collection(db, "users");
 const gymsRef = collection(db, "kbgyms");
 const reviewsRef = collection(db, "reviews");
+const storageRef = ref(storage);
 
 export async function testExpress(req, res) {
   res.json({ message: "Hello, World!" });
@@ -172,4 +174,16 @@ export async function handleCreateReview(req, res) {
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
+}
+
+export async function handleGetVideos(req, res) {
+  const listResult = await listAll(storageRef);
+
+  const videoUrls = await Promise.all(
+    listResult.items.map(async (itemRef) => {
+      const url = await getDownloadURL(itemRef);
+      return { name: itemRef.name, url };
+    })
+  );
+  res.status(200).json(videoUrls);
 }
