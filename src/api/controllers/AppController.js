@@ -104,6 +104,7 @@ export async function handleSignupGym(req, res) {
 export async function createPaymentIntent(req, res) {
   try {
     const gymId = req.body.gymId;
+    const userEmail = req.body.email; // Extract email from request body
     // Retrieve gym data using the provided gymId
     const gymDoc = doc(gymsRef, gymId);
     const gymSnapshot = await getDoc(gymDoc);
@@ -114,6 +115,24 @@ export async function createPaymentIntent(req, res) {
       currency: "ron",
       payment_method_types: ["card"],
     });
+
+    // Retrieve user document using the provided email
+    const userQuery = query(usersRef, where("email", "==", userEmail));
+    const userSnapshot = await getDocs(userQuery);
+    let userDocId;
+    userSnapshot.forEach((doc) => {
+      userDocId = doc.id;
+    });
+
+    // Update the noEntries field for the user document
+    if (userDocId) {
+      const userDocRef = doc(usersRef, userDocId);
+      await setDoc(
+        userDocRef,
+        { noEntries: firebase.firestore.FieldValue.increment(1) },
+        { merge: true }
+      );
+    }
 
     const clientSecret = paymentIntent.client_secret;
 
@@ -140,9 +159,11 @@ export async function handleGetReviews(req, res) {
 export async function handleCreateReview(req, res) {
   try {
     const reviewData = req.body.reviewData;
-    
+
     const currentDate = new Date();
-    const formattedDate = `${currentDate.getDate()}/${currentDate.getMonth() + 1}/${currentDate.getFullYear()}`;
+    const formattedDate = `${currentDate.getDate()}/${
+      currentDate.getMonth() + 1
+    }/${currentDate.getFullYear()}`;
     reviewData.date = formattedDate;
 
     await addDoc(reviewsRef, reviewData);
