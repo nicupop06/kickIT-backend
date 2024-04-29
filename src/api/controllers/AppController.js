@@ -88,7 +88,7 @@ export async function handleSignupGym(req, res) {
   try {
     const gymData = req.body.gymData;
     const uuid = uuidv4();
-    const pngQrCode = await qrcode.toDataURL(gymData.owner + " " + uuid, {
+    const pngQrCode = await qrcode.toDataURL(JSON.stringify(gymData) + "|" + uuid, {
       type: "png",
     });
     gymData.qrCode = pngQrCode;
