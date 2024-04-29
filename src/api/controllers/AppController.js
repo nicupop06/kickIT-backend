@@ -14,7 +14,7 @@ import { v4 as uuidv4 } from "uuid";
 import qrcode from "qrcode";
 import Stripe from "stripe";
 import { STRIPE_SECRET_KEY } from "../../config/stripeConfig.js";
-import { ref, listAll, getDownloadURL } from "@firebase/storage";
+import { ref, listAll, getDownloadURL, getMetadata } from "@firebase/storage";
 
 const stripe = Stripe(STRIPE_SECRET_KEY, { apiVersion: "2023-10-16" });
 const usersRef = collection(db, "users");
@@ -88,9 +88,12 @@ export async function handleSignupGym(req, res) {
   try {
     const gymData = req.body.gymData;
     const uuid = uuidv4();
-    const pngQrCode = await qrcode.toDataURL(JSON.stringify(gymData) + "|" + uuid, {
-      type: "png",
-    });
+    const pngQrCode = await qrcode.toDataURL(
+      JSON.stringify(gymData) + "|" + uuid,
+      {
+        type: "png",
+      }
+    );
     gymData.qrCode = pngQrCode;
     await setDoc(doc(gymsRef, uuid), gymData);
     res.status(200).json(gymData);
@@ -185,13 +188,30 @@ export async function handleCreateReview(req, res) {
 }
 
 export async function handleGetVideos(req, res) {
-  const listResult = await listAll(storageRef);
+  try {
+    const userEmail = req.query.email;
+    const listResult = await listAll(storageRef);
 
-  const videoUrls = await Promise.all(
-    listResult.items.map(async (itemRef) => {
-      const url = await getDownloadURL(itemRef);
-      return { name: itemRef.name, url };
-    })
-  );
-  res.status(200).json(videoUrls);
+    const videoUrls = await Promise.all(
+      listResult.items.map(async (itemRef) => {
+        const metadata = await getMetadata(itemRef);
+        if (metadata.customMetadata.userEmail === userEmail) {
+          const url = await getDownloadURL(itemRef);
+          return { name: itemRef.name, url };
+        }
+        // Return null if the userEmail doesn't match
+        return null;
+      })
+    );
+
+    // Filter out null values
+    const filteredVideoUrls = videoUrls.filter((video) => video !== null);
+
+    console.log(filteredVideoUrls);
+
+    res.status(200).json(filteredVideoUrls);
+  } catch (error) {
+    console.error("Error getting videos:", error);
+    res.status(500).json({ error: "Error getting videos" });
+  }
 }
