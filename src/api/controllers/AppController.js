@@ -123,6 +123,9 @@ export async function createPaymentIntent(req, res) {
       amount: amount,
       currency: "ron",
       payment_method_types: ["card"],
+      metadata: {
+        gymOwner: gymData.owner,
+      },
     });
 
     // Retrieve user document using the provided email
@@ -199,15 +202,11 @@ export async function handleGetVideos(req, res) {
           const url = await getDownloadURL(itemRef);
           return { name: itemRef.name, url };
         }
-        // Return null if the userEmail doesn't match
         return null;
       })
     );
 
-    // Filter out null values
     const filteredVideoUrls = videoUrls.filter((video) => video !== null);
-
-    console.log(filteredVideoUrls);
 
     res.status(200).json(filteredVideoUrls);
   } catch (error) {
