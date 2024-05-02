@@ -125,6 +125,7 @@ export async function createPaymentIntent(req, res) {
       payment_method_types: ["card"],
       metadata: {
         gymOwner: gymData.owner,
+        gym: gymData.name,
       },
     });
 
