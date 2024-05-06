@@ -15,6 +15,7 @@ import qrcode from "qrcode";
 import Stripe from "stripe";
 import { STRIPE_SECRET_KEY } from "../../config/stripeConfig.js";
 import { ref, listAll, getDownloadURL, getMetadata } from "@firebase/storage";
+import axios from "axios";
 
 const stripe = Stripe(STRIPE_SECRET_KEY, { apiVersion: "2023-10-16" });
 const usersRef = collection(db, "users");
@@ -171,6 +172,24 @@ export async function handleGetReviews(req, res) {
     reviews.push(doc.data());
   });
   res.json({ reviews: reviews });
+}
+
+export async function handleGetPayments(req, res) {
+  const gymName = req.query.gymName;
+  const sendURL = "https://api.stripe.com/v1/payment_intents";
+
+  const response = await axios.get(sendURL, {
+    headers: {
+      Authorization: `Bearer ${STRIPE_SECRET_KEY}`,
+    },
+  });
+  var paymentIntents = [];
+  response.data.data.forEach((paymentIntent) => {
+    if (gymName === paymentIntent.metadata.gym) {
+      paymentIntents.push(paymentIntent);
+    }
+  });
+  res.status(200).json({paymentIntents: paymentIntents});
 }
 
 export async function handleCreateReview(req, res) {
