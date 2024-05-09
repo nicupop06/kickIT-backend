@@ -9,6 +9,7 @@ import {
   getDoc,
   setDoc,
   updateDoc,
+  orderBy,
 } from "firebase/firestore";
 import { v4 as uuidv4 } from "uuid";
 import qrcode from "qrcode";
@@ -66,6 +67,31 @@ export async function getKbGyms(req, res) {
     gyms.push(doc.data());
   });
   res.json({ adminGyms: gyms });
+}
+
+export async function handleGetUserRank(req, res) {
+  const email = req.query.email;
+
+  try {
+    // Get all users ordered by noEntries in descending order
+    const usersSnapshot = await getDocs(
+      query(collection(db, "users"), orderBy("noEntries", "desc"))
+    );
+
+    // Find the index of the user with the specified email
+    const userIndex = usersSnapshot.docs.findIndex(
+      (doc) => doc.data().email === email
+    );
+
+    // Calculate the rank of the user
+    const rank = userIndex + 1; // Adding 1 because array indexes start from 0
+
+    // Return the rank and total number of users
+    res.json({ rank: rank, noUsers: usersSnapshot.size });
+  } catch (error) {
+    console.error("Error getting user rank:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
 }
 
 export async function getUserByEmail(req, res) {
@@ -189,7 +215,7 @@ export async function handleGetPayments(req, res) {
       paymentIntents.push(paymentIntent);
     }
   });
-  res.status(200).json({paymentIntents: paymentIntents});
+  res.status(200).json({ paymentIntents: paymentIntents });
 }
 
 export async function handleCreateReview(req, res) {
