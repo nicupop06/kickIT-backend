@@ -209,13 +209,15 @@ export async function handleGetPayments(req, res) {
       Authorization: `Bearer ${STRIPE_SECRET_KEY}`,
     },
   });
-  var paymentIntents = [];
-  response.data.data.forEach((paymentIntent) => {
-    if (gymName === paymentIntent.metadata.gym) {
-      paymentIntents.push(paymentIntent);
-    }
-  });
-  res.status(200).json({ paymentIntents: paymentIntents });
+
+  const paymentIntents = response.data.data.filter(
+    (paymentIntent) => gymName === paymentIntent.metadata.gym
+  );
+  const sortedPaymentIntents = paymentIntents.sort(
+    (a, b) => a.created - b.created
+  );
+
+  res.status(200).json({ paymentIntents: sortedPaymentIntents });
 }
 
 export async function handleCreateReview(req, res) {
