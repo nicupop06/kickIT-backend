@@ -153,6 +153,7 @@ export async function createPaymentIntent(req, res) {
       metadata: {
         gymOwner: gymData.owner,
         gym: gymData.name,
+        userEmail: userEmail,
       },
     });
 
@@ -202,7 +203,7 @@ export async function handleGetReviews(req, res) {
 
 export async function handleGetPayments(req, res) {
   const gymName = req.query.gymName;
-  const sendURL = "https://api.stripe.com/v1/payment_intents";
+  const sendURL = "https://api.stripe.com/v1/payment_intents?limit=100";
 
   const response = await axios.get(sendURL, {
     headers: {
