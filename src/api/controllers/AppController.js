@@ -132,7 +132,7 @@ export async function handleSignupGym(req, res) {
 export async function createPaymentIntent(req, res) {
   try {
     const gymId = req.body.gymId;
-    const userEmail = req.body.email; // Extract email from request body
+    const userEmail = req.body.email;
 
     // Retrieve gym data using the provided gymId
     const gymDoc = doc(gymsRef, gymId);
