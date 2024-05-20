@@ -13,6 +13,7 @@ import {
   handleGetVideos,
   handleGetPayments,
   handleGetUserRank,
+  handleReviewAllowed,
 } from "../controllers/AppController.js";
 
 export const appRoutes = express.Router();
@@ -42,3 +43,5 @@ appRoutes.post("/reviews", handleCreateReview);
 appRoutes.get("/payments", handleGetPayments);
 
 appRoutes.get("/user-rank", handleGetUserRank);
+
+appRoutes.get("/review-allowed", handleReviewAllowed);

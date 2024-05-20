@@ -263,3 +263,22 @@ export async function handleGetVideos(req, res) {
     res.status(500).json({ error: "Error getting videos" });
   }
 }
+
+export async function handleReviewAllowed(req, res) {
+  const email = req.query.email;
+  const gymName = req.query.gymName;
+
+  const sendURL = "https://api.stripe.com/v1/payment_intents?limit=100";
+
+  const response = await axios.get(sendURL, {
+    headers: {
+      Authorization: `Bearer ${STRIPE_SECRET_KEY}`,
+    },
+  });
+
+  const paymentIntents = response.data.data.filter(
+    (paymentIntent) => gymName === paymentIntent.metadata.gym && email === paymentIntent.metadata.userEmail
+  );
+
+  res.status(200).json({ number: paymentIntents.length});
+}
